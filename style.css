@@ -28,6 +28,7 @@ html {
   --color-gray-500: #8f8f8f;
   --color-gray-200: #b5b5b5;
   --color-gray-100: #b9b9b9;
+  --color-gray-90: #f0f0f0;
 
   --color-blue-animation: #2339dd;
   --color-black-edit: rgba(0, 0, 0, 0.3);
@@ -98,11 +99,24 @@ html {
   margin: 0 auto 10px auto;
   width: 768px;
   height: 844px;
-  padding: 84px 24px 74px 45px;
+  padding: 84px 25px 74px 45px;
   box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.25);
   border-radius: 0 0 12px 12px;
   position: relative;
   overflow-y: scroll;
+}
+
+.main::-webkit-scrollbar {
+  width: 20px;
+}
+
+.main::-webkit-scrollbar-track {
+  background: var(--color-white);
+}
+
+.main::-webkit-scrollbar-thumb {
+  background: var(--color-gray-90);
+  border-radius: 6px;
 }
 
 .main__shadow {
@@ -136,17 +150,17 @@ html {
   padding: 0;
 }
 
-.tasks__container {
-}
-
 .task__wrapper {
+  height: 130px;
   display: flex;
   align-items: center;
   margin-top: 39px;
-  padding: 37px 30px 37px 30px;
+  padding: 35px 30px 29px 30px;
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.25);
   border-radius: 12px;
   border-bottom: 6px solid var(--color-green);
+  background-color: var(--color-white);
+  z-index: -1;
 }
 
 .task__wrapper:nth-child(even) {
@@ -159,6 +173,13 @@ html {
   border-radius: 50%;
   box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.35);
   margin-right: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task__checker-done {
+  background-color: var(--color-green);
 }
 
 .task__title {
@@ -166,6 +187,11 @@ html {
   line-height: 28px;
   color: var(--color-gray-800);
   max-width: 305px;
+}
+
+.task__title-done {
+  color: var(--color-gray-200);
+  text-decoration: line-through;
 }
 
 .task__input {
@@ -199,6 +225,21 @@ html {
 
 .footer {
   position: relative;
+}
+
+.footer__shadow {
+  height: 204px;
+  width: 768px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    #ffffff 100%
+  );
+  border-radius: 0 0 12px 12px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .task__wrapper-create {

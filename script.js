@@ -2,12 +2,7 @@
 
 // Data
 
-const tasksArray = [
-  ["Somebody once told me the world has gonna roll me", true],
-  ["Somebody once told me the world", true],
-  ["Somebody once told me", true],
-  ["Somebody once", true],
-];
+let tasksArray = JSON.parse(localStorage.tasks);
 
 // Elements
 
@@ -17,20 +12,27 @@ const overlay = document.querySelector(".main__shadow");
 
 const addTaskBtn = document.querySelector(".button__add-task");
 const closeBtn = document.querySelector(".task__button-close");
-const doneBtn = document.querySelector(".task__button-done");
-const filterClear = document.querySelector(".filter__button-clear");
+const doneBtn = document.querySelector(".task__button-add");
 
-const taskInput = document.querySelector(".task__input");
+const filterClearBtn = document.querySelector(".filter__button-clear");
+const filterSortBtn = document.querySelector(".filter__button-sort");
 
-addTaskBtn.addEventListener("click", function (e) {
-  e.preventDefault();
+const allTaskQuantity = document.querySelector(".header-stat-number-all");
+const doTaskQuantity = document.querySelector(".header-stat-number-do");
+const doneTaskQuantity = document.querySelector(".header-stat-number-done");
+
+const taskInput = document.querySelector(".task__input__add");
+
+// Buttons
+
+addTaskBtn.addEventListener("click", function () {
   overlay.classList.remove("hidden");
   taskCreator.classList.remove("hidden");
 });
 
 doneBtn.addEventListener("click", function () {
   if (taskInput.value !== "") {
-    tasksArray.push([taskInput.value, true]);
+    tasksArray.push({ text: taskInput.value, status: true });
     displayTasks(tasksArray);
     taskInput.value = "";
     overlay.classList.add("hidden");
@@ -43,17 +45,119 @@ closeBtn.addEventListener("click", function () {
   taskCreator.classList.add("hidden");
 });
 
-const addTask = function () {};
+filterClearBtn.addEventListener("click", function () {
+  tasksArray = [];
+  displayTasks(tasksArray);
+});
+
+// Functions
+
+const crossOffTask = function () {
+  let checkerBtn = document.querySelectorAll(".task__button-checker");
+  checkerBtn.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const index = btn.parentElement.dataset.taskNumber;
+      const taskWrapper = document.querySelector(
+        `[data-task-number='${index}']`
+      );
+      const taskChecker = taskWrapper.querySelector(".task__checker");
+      const taskText = taskWrapper.querySelector(".task__title");
+      tasksArray[index].status === true
+        ? (tasksArray[index].status = false)
+        : (tasksArray[index].status = true);
+
+      // tasksArray.unshift(tasksArray[index]);
+      // tasksArray.splice(+index + 1, 1);
+      displayTasks(tasksArray);
+    });
+  });
+};
+
+const deleteTask = function () {
+  let deleteBtn = document.querySelectorAll(".task__button-remove");
+  deleteBtn.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const index = btn.parentElement.parentElement.dataset.taskNumber;
+      tasksArray.splice(index, 1);
+      displayTasks(tasksArray);
+    });
+  });
+};
+
+const editTask = function () {
+  let editBtn = document.querySelectorAll(".task__button-edit");
+  editBtn.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const index = btn.parentElement.parentElement.dataset.taskNumber;
+      const taskWrapper = document.querySelector(
+        `[data-task-number='${index}']`
+      );
+      const taskChecker = taskWrapper.querySelector(".task__button-checker");
+      const doneBtn = taskWrapper.querySelector(".task__button-done");
+      const title = taskWrapper.querySelector(".task__title");
+      const input = taskWrapper.querySelector(".task__input-edit");
+      btn.classList.add("hidden");
+      taskChecker.classList.add("hidden");
+      title.classList.add("hidden");
+      doneBtn.classList.remove("hidden");
+      input.classList.remove("hidden");
+
+      doneBtn.addEventListener("click", function () {
+        tasksArray.forEach((task) => {
+          if (+task.id === +index && input.value) task.text = input.value;
+        });
+        displayTasks(tasksArray);
+        btn.classList.remove("hidden");
+        taskChecker.classList.remove("hidden");
+        title.classList.remove("hidden");
+        doneBtn.classList.add("hidden");
+        input.classList.add("hidden");
+      });
+    });
+  });
+};
+
+const renewStatistics = function () {
+  allTaskQuantity.textContent = tasksArray.length;
+  doTaskQuantity.textContent = tasksArray.filter(
+    (task) => task.status === true
+  ).length;
+  doneTaskQuantity.textContent = tasksArray.filter(
+    (task) => task.status === false
+  ).length;
+};
 
 const displayTasks = function (tasks, sort = false) {
   tasksContainer.innerHTML = "";
   tasks.forEach((task, i) => {
-    const html = ` <div class="task__wrapper">
-    <div class="task__checker"></div>
-    <p class="task__title">
-      ${task[0]}
-    </p>
+    const html = `<div class="task__wrapper" data-task-number="${i}">
+    <button class="task__button task__button-checker">
+      <div class="task__checker ${
+        task.status === true ? "" : "task__checker-done"
+      }">
+        <svg
+          class="task__checker__icon"
+          width="30"
+          height="22"
+          viewBox="0 0 30 22"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M29.52 2.37061L28.5373 1.38793C28.2285 1.07891 27.8168 0.908905 27.3773 0.908905C26.9378 0.908905 26.5259 1.07891 26.2171 1.38793L12.409 15.1957L3.78195 6.56841C3.47317 6.25988 3.06122 6.08963 2.62171 6.08963C2.18244 6.08963 1.77073 6.25988 1.46171 6.56841L0.47878 7.55085C0.169756 7.86036 0 8.27256 0 8.71158C0 9.15085 0.169756 9.5628 0.47878 9.87183L10.2193 19.6118C10.2322 19.6301 10.2459 19.6472 10.2617 19.6628L11.2446 20.6294C11.5534 20.9372 11.9654 21.0911 12.4083 21.0911H12.4134C12.8532 21.0911 13.2651 20.9372 13.5734 20.6294L14.5566 19.6543C14.5724 19.6386 14.5859 19.6257 14.5939 19.6125L29.5198 4.68817C30.16 4.04939 30.16 3.01012 29.52 2.37061Z"
+            fill="white"
+          />
+        </svg>
+      </div>
+    </button>
+    <p class="task__title ${task.status === true ? "" : "task__title-done"}">${
+      task.text
+    }</p>
+    <input type="text" class="task__input task__input-edit hidden" />
     <div class="task__buttons__wrapper">
+    <button class="task__button task__button-edit ${
+      task.status === true ? "" : "hidden"
+    }">
       <svg
         class="task__icon__edit"
         width="42"
@@ -78,30 +182,81 @@ const displayTasks = function (tasks, sort = false) {
           </clipPath>
         </defs>
       </svg>
-      <svg
-        class="task__icon__close"
-        width="38"
-        height="38"
-        viewBox="0 0 38 38"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g clip-path="url(#clip0_36_140)">
-          <path
-            d="M21.0991 19.0008L37.565 2.53481C38.1447 1.95509 38.1447 1.01519 37.565 0.435539C36.9853 -0.144109 36.0454 -0.144183 35.4657 0.435539L18.9997 16.9015L2.53382 0.435539C1.9541 -0.144183 1.01419 -0.144183 0.434547 0.435539C-0.1451 1.01526 -0.145175 1.95517 0.434547 2.53481L16.9005 19.0007L0.434547 35.4667C-0.145175 36.0465 -0.145175 36.9864 0.434547 37.566C0.72437 37.8558 1.1043 38.0007 1.48422 38.0007C1.86415 38.0007 2.244 37.8558 2.53389 37.566L18.9997 21.1001L35.4656 37.566C35.7555 37.8558 36.1354 38.0007 36.5153 38.0007C36.8952 38.0007 37.2751 37.8558 37.565 37.566C38.1447 36.9863 38.1447 36.0464 37.565 35.4667L21.0991 19.0008Z"
-            fill="#8F8F8F"
-          />
+      </button>
+      <button class="task__button task__button-done hidden">
+            <svg
+              class="task__icon__done"
+              width="40"
+              height="40"
+              viewBox="0 0 40 40"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g clip-path="url(#clip0_37_5)">
+                <path
+                  d="M34.1421 5.85781C30.3646 2.08039 25.3422 0 20 0C14.6577 0 9.63523 2.08039 5.85781 5.85781C2.08031 9.63531 0 14.6578 0 20C0 25.3422 2.08031 30.3646 5.85781 34.1421C9.63531 37.9196 14.6577 40 20 40C25.3422 40 30.3646 37.9196 34.1421 34.1421C37.9196 30.3646 40 25.3422 40 20C40 14.6578 37.9196 9.63539 34.1421 5.85781ZM20 37.6562C10.2643 37.6562 2.34375 29.7357 2.34375 20C2.34375 10.2643 10.2643 2.34375 20 2.34375C29.7357 2.34375 37.6562 10.2643 37.6562 20C37.6562 29.7357 29.7357 37.6562 20 37.6562Z"
+                  fill="#8F8F8F"
+                />
+                <path
+                  d="M29.555 13.5827C29.0974 13.1252 28.3554 13.1252 27.8978 13.5828L17.5495 23.9312L12.1021 18.4838C11.6445 18.0262 10.9025 18.0262 10.4448 18.4838C9.98715 18.9413 9.98715 19.6834 10.4448 20.141L16.7208 26.417C16.9496 26.6459 17.2496 26.7602 17.5494 26.7602C17.8493 26.7602 18.1493 26.6458 18.378 26.417L29.555 15.24C30.0127 14.7824 30.0127 14.0404 29.555 13.5827Z"
+                  fill="#8F8F8F"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_37_5">
+                  <rect width="40" height="40" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          </button>
+      <button class="task__button task__button-remove ${
+        task.status === true ? "" : "hidden"
+      }">
+            <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_36_140)">
+              <path d="M21.0991 19.0008L37.565 2.53481C38.1447 1.95509 38.1447 1.01519 37.565 0.435539C36.9853 -0.144109 36.0454 -0.144183 35.4657 0.435539L18.9997 16.9015L2.53382 0.435539C1.9541 -0.144183 1.01419 -0.144183 0.434547 0.435539C-0.1451 1.01526 -0.145175 1.95517 0.434547 2.53481L16.9005 19.0007L0.434547 35.4667C-0.145175 36.0465 -0.145175 36.9864 0.434547 37.566C0.72437 37.8558 1.1043 38.0007 1.48422 38.0007C1.86415 38.0007 2.244 37.8558 2.53389 37.566L18.9997 21.1001L35.4656 37.566C35.7555 37.8558 36.1354 38.0007 36.5153 38.0007C36.8952 38.0007 37.2751 37.8558 37.565 37.566C38.1447 36.9863 38.1447 36.0464 37.565 35.4667L21.0991 19.0008Z" fill="#8F8F8F"/>
+            </g>
+            <defs>
+              <clipPath id="clip0_36_140">
+              <rect width="38" height="38" fill="white"/>
+              </clipPath>
+            </defs>
+            </svg>
+      </button>
+      <button class="task__button task__button-remove ${
+        task.status === true ? "hidden" : ""
+      }">
+      <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clip-path="url(#clip0_36_168)">
+          <path d="M26.7933 15.2167C26.25 15.2167 25.8097 15.657 25.8097 16.2003V34.7904C25.8097 35.3333 26.25 35.774 26.7933 35.774C27.3366 35.774 27.7769 35.3333 27.7769 34.7904V16.2003C27.7769 15.657 27.3366 15.2167 26.7933 15.2167Z" fill="#B5B5B5"/>
+          <path d="M15.1868 15.2167C14.6435 15.2167 14.2032 15.657 14.2032 16.2003V34.7904C14.2032 35.3333 14.6435 35.774 15.1868 35.774C15.73 35.774 16.1704 35.3333 16.1704 34.7904V16.2003C16.1704 15.657 15.73 15.2167 15.1868 15.2167Z" fill="#B5B5B5"/>
+          <path d="M6.72777 12.5028V36.7368C6.72777 38.1691 7.253 39.5143 8.17051 40.4794C9.0838 41.4473 10.3548 41.9967 11.685 41.999H30.2951C31.6256 41.9967 32.8966 41.4473 33.8095 40.4794C34.727 39.5143 35.2523 38.1691 35.2523 36.7368V12.5028C37.0762 12.0187 38.258 10.2567 38.014 8.38515C37.7697 6.514 36.1755 5.11429 34.2883 5.11391H29.2523V3.8844C29.258 2.85046 28.8492 1.85764 28.1173 1.12724C27.3854 0.39722 26.391 -0.00928491 25.3571 -0.000832066H16.623C15.589 -0.00928491 14.5947 0.39722 13.8627 1.12724C13.1308 1.85764 12.722 2.85046 12.7277 3.8844V5.11391H7.69178C5.80449 5.11429 4.21036 6.514 3.96599 8.38515C3.72201 10.2567 4.90387 12.0187 6.72777 12.5028ZM30.2951 40.0318H11.685C10.0032 40.0318 8.69497 38.5872 8.69497 36.7368V12.5893H33.2851V36.7368C33.2851 38.5872 31.9768 40.0318 30.2951 40.0318ZM14.695 3.8844C14.6884 3.37224 14.8898 2.87928 15.2532 2.51773C15.6163 2.15618 16.1104 1.95754 16.623 1.96637H25.3571C25.8696 1.95754 26.3637 2.15618 26.7268 2.51773C27.0903 2.8789 27.2916 3.37224 27.2851 3.8844V5.11391H14.695V3.8844ZM7.69178 7.08111H34.2883C35.2661 7.08111 36.0587 7.87376 36.0587 8.8516C36.0587 9.82944 35.2661 10.6221 34.2883 10.6221H7.69178C6.71394 10.6221 5.92129 9.82944 5.92129 8.8516C5.92129 7.87376 6.71394 7.08111 7.69178 7.08111Z" fill="#B5B5B5"/>
+          <path d="M20.99 15.2167C20.4467 15.2167 20.0064 15.657 20.0064 16.2003V34.7904C20.0064 35.3333 20.4467 35.774 20.99 35.774C21.5333 35.774 21.9736 35.3333 21.9736 34.7904V16.2003C21.9736 15.657 21.5333 15.2167 20.99 15.2167Z" fill="#B5B5B5"/>
         </g>
         <defs>
-          <clipPath id="clip0_36_140">
-            <rect width="38" height="38" fill="white" />
+          <clipPath id="clip0_36_168">
+          <rect width="42" height="42" fill="white"/>
           </clipPath>
         </defs>
       </svg>
-    </div>
+      </button>
+      </div>
   </div>`;
+    task.id = i;
     tasksContainer.insertAdjacentHTML("afterbegin", html);
+    const input = document
+      .querySelector(`[data-task-number='${i}']`)
+      .querySelector(".task__input-edit");
+    input.value = `${task.text}`;
   });
+  crossOffTask();
+  deleteTask();
+  editTask();
+  renewStatistics();
+  localStorage.tasks = JSON.stringify(tasksArray);
 };
 
+// Initial launch
+
 displayTasks(tasksArray);
+renewStatistics();
