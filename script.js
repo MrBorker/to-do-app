@@ -8,6 +8,7 @@ let tasksArray = JSON.parse(localStorage.tasks);
 
 const tasksContainer = document.querySelector(".tasks__container");
 const taskCreator = document.querySelector(".task__wrapper-create");
+const taskInput = document.querySelector(".task__input__add");
 const overlay = document.querySelector(".main__shadow");
 
 const addTaskBtn = document.querySelector(".button__add-task");
@@ -18,142 +19,76 @@ const filterClearBtn = document.querySelector(".filter__button-clear");
 const filterSortBtn = document.querySelector(".filter__button-sort");
 const filterContainer = document.querySelector(".filter__options");
 const filterInput = filterContainer.querySelectorAll("input");
+const defaultFilter = document.querySelector("#radio-1");
 
 const allTaskQuantity = document.querySelector(".header-stat-number-all");
 const doTaskQuantity = document.querySelector(".header-stat-number-do");
 const doneTaskQuantity = document.querySelector(".header-stat-number-done");
 
-const taskInput = document.querySelector(".task__input__add");
-
-// Buttons
-
-document.body.addEventListener("click", function (event) {
-  if (event.target !== filterContainer && event.target !== filterSortBtn)
-    filterContainer.classList.add("hidden");
-});
-
-filterSortBtn.addEventListener("click", function () {
-  filterContainer.classList.toggle("hidden");
-});
-
-filterInput.forEach((btn) => {
-  btn.addEventListener("click", function () {
-    let filteredArray = [...tasksArray];
-    switch (btn.id) {
-      case "radio-1":
-        displayTasks(JSON.parse(localStorage.tasks));
-        break;
-      case "radio-2":
-        displayTasks(filteredArray.filter((task) => task.status === true));
-        break;
-      case "radio-3":
-        displayTasks(filteredArray.filter((task) => task.status === false));
-        break;
-      case "radio-4":
-        displayTasks(
-          filteredArray.sort((a, b) =>
-            a.text > b.text ? -1 : b.text > a.text ? 1 : 0
-          )
-        );
-        break;
-    }
-  });
-});
-
-addTaskBtn.addEventListener("click", function () {
-  overlay.classList.remove("hidden");
-  taskCreator.classList.remove("hidden");
-});
-
-doneBtn.addEventListener("click", function () {
-  if (taskInput.value !== "") {
-    tasksArray.push({ text: taskInput.value, status: true });
-    displayTasks(tasksArray);
-    localStorage.tasks = JSON.stringify(tasksArray);
-    taskInput.value = "";
-    overlay.classList.add("hidden");
-    taskCreator.classList.add("hidden");
-  }
-});
-
-closeBtn.addEventListener("click", function () {
-  overlay.classList.add("hidden");
-  taskCreator.classList.add("hidden");
-});
-
-filterClearBtn.addEventListener("click", function () {
-  tasksArray = [];
-  displayTasks(tasksArray);
-  localStorage.tasks = JSON.stringify(tasksArray);
-});
+const taskChecker = ".task__button-checker";
+const taskRemover = ".task__button-remove";
+const taskEditor = ".task__button-edit";
 
 // Functions
 
-const crossOffTask = function () {
-  let checkerBtn = document.querySelectorAll(".task__button-checker");
-  checkerBtn.forEach((btn) => {
-    btn.addEventListener("click", function () {
-      const index = btn.parentElement.dataset.taskNumber;
-      const taskWrapper = document.querySelector(
-        `[data-task-number='${index}']`
-      );
-      const taskChecker = taskWrapper.querySelector(".task__checker");
-      const taskText = taskWrapper.querySelector(".task__title");
-      tasksArray[index].status === true
-        ? (tasksArray[index].status = false)
-        : (tasksArray[index].status = true);
+const closeTaskCreator = function () {
+  taskInput.value = "";
+  overlay.classList.add("hidden");
+  taskCreator.classList.add("hidden");
+};
 
-      // tasksArray.unshift(tasksArray[index]);
-      // tasksArray.splice(+index + 1, 1);
-      displayTasks(tasksArray);
-      localStorage.tasks = JSON.stringify(tasksArray);
-    });
-  });
+const displayAndSave = function (array) {
+  displayTasks(array);
+  localStorage.tasks = JSON.stringify(array);
+  defaultFilter.checked = true;
+};
+
+const handleTask = function (selector, action) {
+  let button = document.querySelectorAll(selector);
+  button.forEach((btn) => btn.addEventListener("click", action));
+};
+
+const crossOffTask = function () {
+  const id = this.parentElement.dataset.taskNumber;
+  const index = tasksArray.findIndex((item) => item.id === id);
+  tasksArray[index].status === true
+    ? (tasksArray[index].status = false)
+    : (tasksArray[index].status = true);
+  displayAndSave(tasksArray);
 };
 
 const deleteTask = function () {
-  let deleteBtn = document.querySelectorAll(".task__button-remove");
-  deleteBtn.forEach((btn) => {
-    btn.addEventListener("click", function () {
-      const index = btn.parentElement.parentElement.dataset.taskNumber;
-      tasksArray.splice(index, 1);
-      displayTasks(tasksArray);
-      localStorage.tasks = JSON.stringify(tasksArray);
-    });
-  });
+  const id = this.parentElement.parentElement.dataset.taskNumber;
+  const index = tasksArray.findIndex((item) => item.id === id);
+  tasksArray.splice(index, 1);
+  displayAndSave(tasksArray);
 };
 
 const editTask = function () {
-  let editBtn = document.querySelectorAll(".task__button-edit");
-  editBtn.forEach((btn) => {
-    btn.addEventListener("click", function () {
-      const index = btn.parentElement.parentElement.dataset.taskNumber;
-      const taskWrapper = document.querySelector(
-        `[data-task-number='${index}']`
-      );
-      const taskChecker = taskWrapper.querySelector(".task__button-checker");
-      const doneBtn = taskWrapper.querySelector(".task__button-done");
-      const title = taskWrapper.querySelector(".task__title");
-      const input = taskWrapper.querySelector(".task__input-edit");
-      btn.classList.add("hidden");
-      taskChecker.classList.add("hidden");
-      title.classList.add("hidden");
-      doneBtn.classList.remove("hidden");
-      input.classList.remove("hidden");
+  const id = this.parentElement.parentElement.dataset.taskNumber;
+  const index = tasksArray.findIndex((item) => item.id === id);
+  const taskWrapper = document.querySelector(`[data-task-number='${id}']`);
+  const taskChecker = taskWrapper.querySelector(".task__button-checker");
+  const doneBtn = taskWrapper.querySelector(".task__button-done");
+  const title = taskWrapper.querySelector(".task__title");
+  const input = taskWrapper.querySelector(".task__input-edit");
 
-      doneBtn.addEventListener("click", function () {
-        tasksArray.forEach((task) => {
-          if (+task.id === +index && input.value) task.text = input.value;
-        });
-        displayTasks(tasksArray);
-        localStorage.tasks = JSON.stringify(tasksArray);
-        btn.classList.remove("hidden");
-        taskChecker.classList.remove("hidden");
-        title.classList.remove("hidden");
-        doneBtn.classList.add("hidden");
-        input.classList.add("hidden");
-      });
+  this.classList.add("hidden");
+  taskChecker.classList.add("hidden");
+  title.classList.add("hidden");
+  doneBtn.classList.remove("hidden");
+  input.classList.remove("hidden");
+
+  doneBtn.addEventListener("click", function () {
+    tasksArray.forEach((task) => {
+      if (task.id === id && input.value) task.text = input.value;
     });
+    displayAndSave(tasksArray);
+    this.classList.remove("hidden");
+    taskChecker.classList.remove("hidden");
+    title.classList.remove("hidden");
+    doneBtn.classList.add("hidden");
+    input.classList.add("hidden");
   });
 };
 
@@ -167,10 +102,10 @@ const renewStatistics = function (array) {
   ).length;
 };
 
-const displayTasks = function (tasks) {
+const displayTasks = function (array) {
   tasksContainer.innerHTML = "";
-  tasks.forEach((task, i) => {
-    const html = `<div class="task__wrapper" data-task-number="${i}">
+  array.forEach((task) => {
+    const html = `<div class="task__wrapper" data-task-number="${task.id}">
     <button class="task__button task__button-checker">
       <div class="task__checker ${
         task.status === true ? "" : "task__checker-done"
@@ -282,20 +217,81 @@ const displayTasks = function (tasks) {
       </button>
       </div>
   </div>`;
-    task.id = i;
     tasksContainer.insertAdjacentHTML("afterbegin", html);
     const input = document
-      .querySelector(`[data-task-number='${i}']`)
+      .querySelector(`[data-task-number='${task.id}']`)
       .querySelector(".task__input-edit");
     input.value = `${task.text}`;
   });
-  crossOffTask();
-  deleteTask();
-  editTask();
-  renewStatistics(tasks);
+  handleTask(taskChecker, crossOffTask);
+  handleTask(taskRemover, deleteTask);
+  handleTask(taskEditor, editTask);
+  renewStatistics(array);
 };
+
+// Buttons
+
+filterSortBtn.addEventListener("click", function () {
+  filterContainer.classList.toggle("hidden");
+});
+
+filterInput.forEach((btn) => {
+  btn.addEventListener("click", function () {
+    let filteredArray = [...tasksArray];
+    switch (btn.id) {
+      case "radio-1":
+        displayTasks(JSON.parse(localStorage.tasks));
+        break;
+      case "radio-2":
+        displayTasks(filteredArray.filter((task) => task.status === true));
+        break;
+      case "radio-3":
+        displayTasks(filteredArray.filter((task) => task.status === false));
+        break;
+      case "radio-4":
+        displayTasks(
+          filteredArray.sort((a, b) =>
+            a.text > b.text ? -1 : b.text > a.text ? 1 : 0
+          )
+        );
+        break;
+    }
+  });
+});
+
+document.body.addEventListener("click", function (event) {
+  if (event.target !== filterContainer && event.target !== filterSortBtn)
+    filterContainer.classList.add("hidden");
+});
+
+filterClearBtn.addEventListener("click", function () {
+  tasksArray = [];
+  displayAndSave(tasksArray);
+});
+
+addTaskBtn.addEventListener("click", function () {
+  overlay.classList.remove("hidden");
+  taskCreator.classList.remove("hidden");
+});
+
+doneBtn.addEventListener("click", function () {
+  if (taskInput.value !== "") {
+    tasksArray.push({
+      text: taskInput.value,
+      status: true,
+      id: Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1),
+    });
+    displayAndSave(tasksArray);
+    closeTaskCreator();
+  }
+});
+
+closeBtn.addEventListener("click", closeTaskCreator);
 
 // Initial launch
 
 displayTasks(tasksArray);
 renewStatistics(tasksArray);
+console.log(tasksArray);

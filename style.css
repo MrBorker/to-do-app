@@ -114,7 +114,7 @@ html {
 }
 
 .main::-webkit-scrollbar {
-  width: 20px;
+  width: 10px;
 }
 
 .main::-webkit-scrollbar-track {
@@ -134,7 +134,7 @@ html {
   height: 100%;
   left: 0;
   top: 0;
-  border-radius: inherit;
+  border-radius: 0 0 12px 12px;
 }
 
 .filter {
@@ -179,6 +179,7 @@ html {
 
 .filter__picture {
   margin-right: 8px;
+  pointer-events: none;
 }
 
 .filter__button {
@@ -271,6 +272,7 @@ html {
 
 .footer__shadow {
   height: 204px;
+  width: 100%;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.45) 0%,
