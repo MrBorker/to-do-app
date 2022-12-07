@@ -16,6 +16,8 @@ const doneBtn = document.querySelector(".task__button-add");
 
 const filterClearBtn = document.querySelector(".filter__button-clear");
 const filterSortBtn = document.querySelector(".filter__button-sort");
+const filterContainer = document.querySelector(".filter__options");
+const filterInput = filterContainer.querySelectorAll("input");
 
 const allTaskQuantity = document.querySelector(".header-stat-number-all");
 const doTaskQuantity = document.querySelector(".header-stat-number-do");
@@ -24,6 +26,39 @@ const doneTaskQuantity = document.querySelector(".header-stat-number-done");
 const taskInput = document.querySelector(".task__input__add");
 
 // Buttons
+
+document.body.addEventListener("click", function (event) {
+  if (event.target !== filterContainer && event.target !== filterSortBtn)
+    filterContainer.classList.add("hidden");
+});
+
+filterSortBtn.addEventListener("click", function () {
+  filterContainer.classList.toggle("hidden");
+});
+
+filterInput.forEach((btn) => {
+  btn.addEventListener("click", function () {
+    let filteredArray = [...tasksArray];
+    switch (btn.id) {
+      case "radio-1":
+        displayTasks(JSON.parse(localStorage.tasks));
+        break;
+      case "radio-2":
+        displayTasks(filteredArray.filter((task) => task.status === true));
+        break;
+      case "radio-3":
+        displayTasks(filteredArray.filter((task) => task.status === false));
+        break;
+      case "radio-4":
+        displayTasks(
+          filteredArray.sort((a, b) =>
+            a.text > b.text ? -1 : b.text > a.text ? 1 : 0
+          )
+        );
+        break;
+    }
+  });
+});
 
 addTaskBtn.addEventListener("click", function () {
   overlay.classList.remove("hidden");
@@ -34,6 +69,7 @@ doneBtn.addEventListener("click", function () {
   if (taskInput.value !== "") {
     tasksArray.push({ text: taskInput.value, status: true });
     displayTasks(tasksArray);
+    localStorage.tasks = JSON.stringify(tasksArray);
     taskInput.value = "";
     overlay.classList.add("hidden");
     taskCreator.classList.add("hidden");
@@ -48,6 +84,7 @@ closeBtn.addEventListener("click", function () {
 filterClearBtn.addEventListener("click", function () {
   tasksArray = [];
   displayTasks(tasksArray);
+  localStorage.tasks = JSON.stringify(tasksArray);
 });
 
 // Functions
@@ -69,6 +106,7 @@ const crossOffTask = function () {
       // tasksArray.unshift(tasksArray[index]);
       // tasksArray.splice(+index + 1, 1);
       displayTasks(tasksArray);
+      localStorage.tasks = JSON.stringify(tasksArray);
     });
   });
 };
@@ -80,6 +118,7 @@ const deleteTask = function () {
       const index = btn.parentElement.parentElement.dataset.taskNumber;
       tasksArray.splice(index, 1);
       displayTasks(tasksArray);
+      localStorage.tasks = JSON.stringify(tasksArray);
     });
   });
 };
@@ -107,6 +146,7 @@ const editTask = function () {
           if (+task.id === +index && input.value) task.text = input.value;
         });
         displayTasks(tasksArray);
+        localStorage.tasks = JSON.stringify(tasksArray);
         btn.classList.remove("hidden");
         taskChecker.classList.remove("hidden");
         title.classList.remove("hidden");
@@ -117,17 +157,17 @@ const editTask = function () {
   });
 };
 
-const renewStatistics = function () {
-  allTaskQuantity.textContent = tasksArray.length;
-  doTaskQuantity.textContent = tasksArray.filter(
+const renewStatistics = function (array) {
+  allTaskQuantity.textContent = array.length;
+  doTaskQuantity.textContent = array.filter(
     (task) => task.status === true
   ).length;
-  doneTaskQuantity.textContent = tasksArray.filter(
+  doneTaskQuantity.textContent = array.filter(
     (task) => task.status === false
   ).length;
 };
 
-const displayTasks = function (tasks, sort = false) {
+const displayTasks = function (tasks) {
   tasksContainer.innerHTML = "";
   tasks.forEach((task, i) => {
     const html = `<div class="task__wrapper" data-task-number="${i}">
@@ -252,11 +292,10 @@ const displayTasks = function (tasks, sort = false) {
   crossOffTask();
   deleteTask();
   editTask();
-  renewStatistics();
-  localStorage.tasks = JSON.stringify(tasksArray);
+  renewStatistics(tasks);
 };
 
 // Initial launch
 
 displayTasks(tasksArray);
-renewStatistics();
+renewStatistics(tasksArray);

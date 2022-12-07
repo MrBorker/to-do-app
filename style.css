@@ -26,6 +26,8 @@ html {
   --color-black: #000000;
   --color-gray-800: #555555;
   --color-gray-500: #8f8f8f;
+  --color-gray-400: #8e8e8e;
+  --color-gray-300: #c4c4c4;
   --color-gray-200: #b5b5b5;
   --color-gray-100: #b9b9b9;
   --color-gray-90: #f0f0f0;
@@ -35,10 +37,16 @@ html {
 }
 
 /* ====================================================== */
+
+.container {
+  width: 768px;
+  margin: 0 auto;
+  position: relative;
+}
+
 /* Header */
 
 .header {
-  width: 768px;
   height: 180px;
   margin: 10px auto 0 auto;
   background: var(--gradient-blue);
@@ -97,9 +105,8 @@ html {
 
 .main {
   margin: 0 auto 10px auto;
-  width: 768px;
   height: 844px;
-  padding: 84px 25px 74px 45px;
+  padding: 84px 25px 200px 45px;
   box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.25);
   border-radius: 0 0 12px 12px;
   position: relative;
@@ -133,6 +140,41 @@ html {
 .filter {
   display: flex;
   justify-content: space-between;
+}
+
+.filter__options {
+  position: absolute;
+  top: 115px;
+  background-color: var(--color-white);
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 12, 0.45);
+  border-radius: 12px;
+  padding: 24px 0 11px 19px;
+  width: 251px;
+  color: var(--color-gray-400);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+.radio {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.filter__options input {
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.35);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+}
+
+.filter__options input:checked {
+  background: var(--color-gray-300);
 }
 
 .filter__picture {
@@ -229,7 +271,6 @@ html {
 
 .footer__shadow {
   height: 204px;
-  width: 768px;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.45) 0%,
