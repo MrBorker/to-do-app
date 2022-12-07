@@ -2,7 +2,7 @@
 
 // Data
 
-let tasksArray = JSON.parse(localStorage.tasks);
+let tasksArray = localStorage.tasks ? JSON.parse(localStorage.tasks) : [];
 
 // Elements
 
@@ -66,7 +66,6 @@ const deleteTask = function () {
 
 const editTask = function () {
   const id = this.parentElement.parentElement.dataset.taskNumber;
-  const index = tasksArray.findIndex((item) => item.id === id);
   const taskWrapper = document.querySelector(`[data-task-number='${id}']`);
   const taskChecker = taskWrapper.querySelector(".task__button-checker");
   const doneBtn = taskWrapper.querySelector(".task__button-done");
@@ -294,4 +293,3 @@ closeBtn.addEventListener("click", closeTaskCreator);
 
 displayTasks(tasksArray);
 renewStatistics(tasksArray);
-console.log(tasksArray);
