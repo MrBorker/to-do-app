@@ -14,13 +14,13 @@ const overlay = document.querySelector(".main__shadow");
 
 const addTaskBtn = document.querySelector(".button__add-task");
 const closeBtn = document.querySelector(".task__button-close");
-const doneBtn = document.querySelector(".task__button-add");
+const createBtn = document.querySelector(".task__button-add");
 
 const filterClearBtn = document.querySelector(".filter__button-clear");
-const filterSortBtn = document.querySelector(".filter__button-sort");
+const filterOpenBtn = document.querySelector(".filter__button-sort");
 const filterContainer = document.querySelector(".filter__options");
 const filterInput = filterContainer.querySelectorAll("input");
-const defaultFilter = document.querySelector("#radio-1");
+const defaultFilter = document.querySelector("#default");
 
 const allTaskQuantity = document.querySelector(".header-stat-number-all");
 const doTaskQuantity = document.querySelector(".header-stat-number-do");
@@ -30,8 +30,32 @@ const taskCheckerBtn = ".task__button-checker";
 const taskRemoverBtn = ".task__button-remove";
 const taskRemoverDoneBtn = ".task__button-remove-done";
 const taskEditorBtn = ".task__button-edit";
+const taskDoneBtn = ".task__button-done";
 
 // Functions
+
+const removeChildNodes = function (parent) {
+  while (parent.firstChild) {
+    parent.firstChild.remove();
+  }
+};
+
+const getUniqueId = function () {
+  return Math.floor((1 + Math.random()) * 0x10000)
+    .toString(16)
+    .substring(1);
+};
+
+const getNodes = function () {
+  const taskWrapper = this.closest(".task__wrapper");
+  const input = taskWrapper.querySelector(".task__input-edit");
+  const id = taskWrapper.dataset.taskNumber;
+  const index = tasksArray.findIndex((item) => item.id === id);
+  const taskCheckerBtn = taskWrapper.querySelector(".task__button-checker");
+  const doneBtn = taskWrapper.querySelector(".task__button-done");
+  const title = taskWrapper.querySelector(".task__title");
+  return { taskWrapper, index, input, taskCheckerBtn, doneBtn, title };
+};
 
 const closeTaskCreator = function () {
   taskInput.value = "";
@@ -39,58 +63,49 @@ const closeTaskCreator = function () {
   taskCreator.classList.add("hidden");
 };
 
-const displayAndSave = function (array) {
-  displayTasks(array);
+const renderAndSave = function (array) {
+  renderTasks(array);
   localStorage.tasks = JSON.stringify(array);
   defaultFilter.checked = true;
 };
 
-const handleTask = function (selector, action) {
+const taskButtons = function (selector, action) {
   let button = document.querySelectorAll(selector);
   button.forEach((btn) => btn.addEventListener("click", action));
 };
 
-const crossOffTask = function () {
-  const id = this.parentElement.dataset.taskNumber;
-  const index = tasksArray.findIndex((item) => item.id === id);
-  tasksArray[index].status === true
-    ? (tasksArray[index].status = false)
-    : (tasksArray[index].status = true);
-  displayAndSave(tasksArray);
+const handleCrossOffTaskBtnClick = function () {
+  const { index } = getNodes.call(this);
+  tasksArray[index].status = !tasksArray[index].status;
+  renderAndSave(tasksArray);
 };
 
-const deleteTask = function () {
-  const id = this.parentElement.parentElement.dataset.taskNumber;
-  const index = tasksArray.findIndex((item) => item.id === id);
+const handleDeleteTaskBtnClick = function () {
+  const { index } = getNodes.call(this);
   tasksArray.splice(index, 1);
-  displayAndSave(tasksArray);
+  renderAndSave(tasksArray);
 };
 
-const editTask = function () {
-  const id = this.parentElement.parentElement.dataset.taskNumber;
-  const taskWrapper = document.querySelector(`[data-task-number='${id}']`);
-  const taskCheckerBtn = taskWrapper.querySelector(".task__button-checker");
-  const doneBtn = taskWrapper.querySelector(".task__button-done");
-  const title = taskWrapper.querySelector(".task__title");
-  const input = taskWrapper.querySelector(".task__input-edit");
+const handleEditTaskBtnClick = function () {
+  const { input, taskCheckerBtn, doneBtn, title } = getNodes.call(this);
 
-  this.classList.add("hidden");
-  taskCheckerBtn.classList.add("hidden");
-  title.classList.add("hidden");
-  doneBtn.classList.remove("hidden");
-  input.classList.remove("hidden");
+  this.classList.toggle("hidden");
+  taskCheckerBtn.classList.toggle("hidden");
+  title.classList.toggle("hidden");
+  doneBtn.classList.toggle("hidden");
+  input.classList.toggle("hidden");
+};
 
-  doneBtn.addEventListener("click", function () {
-    tasksArray.forEach((task) => {
-      if (task.id === id && input.value) task.text = input.value;
-    });
-    displayAndSave(tasksArray);
-    this.classList.remove("hidden");
-    taskCheckerBtn.classList.remove("hidden");
-    title.classList.remove("hidden");
-    doneBtn.classList.add("hidden");
-    input.classList.add("hidden");
-  });
+const handleDoneBtnClick = function () {
+  const { index, input } = getNodes.call(this);
+  if (input.value) {
+    tasksArray[index].text = input.value;
+    renderAndSave(tasksArray);
+    handleEditTaskBtnClick.call(this);
+
+    return;
+  }
+  renderTasks(tasksArray);
 };
 
 const renewStatistics = function (array) {
@@ -103,10 +118,8 @@ const renewStatistics = function (array) {
   ).length;
 };
 
-const displayTasks = function (array) {
-  while (tasksContainer.firstChild) {
-    tasksContainer.firstChild.remove();
-  }
+const renderTasks = function (array) {
+  removeChildNodes(tasksContainer);
   array.forEach((task) => {
     const taskGenerator = taskTemplate.content.cloneNode(true);
     const taskWrapper = taskGenerator.querySelector(".task__wrapper");
@@ -138,75 +151,79 @@ const displayTasks = function (array) {
       .querySelector(".task__input-edit");
     input.value = `${task.text}`;
   });
-  handleTask(taskCheckerBtn, crossOffTask);
-  handleTask(taskRemoverBtn, deleteTask);
-  handleTask(taskRemoverDoneBtn, deleteTask);
-  handleTask(taskEditorBtn, editTask);
+  taskButtons(taskCheckerBtn, handleCrossOffTaskBtnClick);
+  taskButtons(taskRemoverBtn, handleDeleteTaskBtnClick);
+  taskButtons(taskRemoverDoneBtn, handleDeleteTaskBtnClick);
+  taskButtons(taskEditorBtn, handleEditTaskBtnClick);
+  taskButtons(taskDoneBtn, handleDoneBtnClick);
   renewStatistics(array);
 };
 
 // Buttons
 
-filterSortBtn.addEventListener("click", function () {
-  filterContainer.classList.toggle("hidden");
-});
-
-filterInput.forEach((btn) => {
-  btn.addEventListener("click", function () {
-    let filteredArray = [...tasksArray];
-    switch (btn.id) {
-      case "radio-1":
-        displayTasks(JSON.parse(localStorage.tasks));
-        break;
-      case "radio-2":
-        displayTasks(filteredArray.filter((task) => task.status === true));
-        break;
-      case "radio-3":
-        displayTasks(filteredArray.filter((task) => task.status === false));
-        break;
-      case "radio-4":
-        displayTasks(
-          filteredArray.sort((a, b) =>
-            a.text > b.text ? 1 : b.text > a.text ? -1 : 0
-          )
-        );
-        break;
-    }
-  });
-});
-
 document.body.addEventListener("click", function (event) {
-  if (event.target !== filterContainer && event.target !== filterSortBtn)
+  if (event.target !== filterContainer && event.target !== filterOpenBtn)
     filterContainer.classList.add("hidden");
 });
 
-filterClearBtn.addEventListener("click", function () {
-  tasksArray = [];
-  displayAndSave(tasksArray);
-});
+const handleFilterOpenBtnClick = function () {
+  filterContainer.classList.toggle("hidden");
+};
 
-addTaskBtn.addEventListener("click", function () {
+const handleFilterBtnClick = function () {
+  let filteredArray = [...tasksArray];
+  switch (this.id) {
+    case "default":
+      renderTasks(JSON.parse(localStorage.tasks));
+      break;
+    case "active":
+      renderTasks(filteredArray.filter((task) => task.status === true));
+      break;
+    case "done":
+      renderTasks(filteredArray.filter((task) => task.status === false));
+      break;
+    case "alphabet":
+      renderTasks(
+        filteredArray.sort((a, b) =>
+          a.text > b.text ? 1 : b.text > a.text ? -1 : 0
+        )
+      );
+      break;
+  }
+};
+
+const handleClearBtnClick = function () {
+  tasksArray = [];
+  renderAndSave(tasksArray);
+};
+
+const handleAddTaskBtnClick = function () {
   overlay.classList.remove("hidden");
   taskCreator.classList.remove("hidden");
-});
+};
 
-doneBtn.addEventListener("click", function () {
+const handleCreateBtnClick = function () {
   if (taskInput.value !== "") {
     tasksArray.push({
       text: taskInput.value,
       status: true,
-      id: Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1),
+      id: getUniqueId(),
     });
-    displayAndSave(tasksArray);
+    renderAndSave(tasksArray);
     closeTaskCreator();
   }
+};
+
+filterInput.forEach((btn) => {
+  btn.addEventListener("click", handleFilterBtnClick);
 });
 
+filterOpenBtn.addEventListener("click", handleFilterOpenBtnClick);
+addTaskBtn.addEventListener("click", handleAddTaskBtnClick);
+filterClearBtn.addEventListener("click", handleClearBtnClick);
+createBtn.addEventListener("click", handleCreateBtnClick);
 closeBtn.addEventListener("click", closeTaskCreator);
 
 // Initial launch
-
-displayTasks(tasksArray);
+renderTasks(tasksArray);
 renewStatistics(tasksArray);
