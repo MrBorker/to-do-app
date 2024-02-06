@@ -10,7 +10,8 @@ const tasksContainer = document.querySelector(".tasks__container");
 const taskTemplate = document.querySelector("#task__template");
 const taskCreator = document.querySelector(".task__wrapper-create");
 const taskInput = document.querySelector(".task__input__add");
-const overlay = document.querySelector(".main__shadow");
+const overlay = document.querySelector(".shadow");
+const main = document.querySelector(".main");
 
 const addTaskBtn = document.querySelector(".button__add-task");
 const closeBtn = document.querySelector(".task__button-close");
@@ -55,12 +56,6 @@ const getNodes = function () {
   const doneBtn = taskWrapper.querySelector(".task__button-done");
   const title = taskWrapper.querySelector(".task__title");
   return { taskWrapper, index, input, taskCheckerBtn, doneBtn, title };
-};
-
-const closeTaskCreator = function () {
-  taskInput.value = "";
-  overlay.classList.add("hidden");
-  taskCreator.classList.add("hidden");
 };
 
 const renderAndSave = function (array) {
@@ -200,6 +195,12 @@ const handleClearBtnClick = function () {
 const handleAddTaskBtnClick = function () {
   overlay.classList.remove("hidden");
   taskCreator.classList.remove("hidden");
+};
+
+const closeTaskCreator = function () {
+  taskInput.value = "";
+  overlay.classList.add("hidden");
+  taskCreator.classList.add("hidden");
 };
 
 const handleCreateBtnClick = function () {
