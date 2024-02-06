@@ -16,7 +16,6 @@
   </head>
   <body>
     <div class="container">
-      <div class="main__shadow hidden"></div>
       <header class="header">
         <h1 class="header__title">Your personal task manager</h1>
         <div class="header-stats">
@@ -47,8 +46,9 @@
             >
               <path d="M6 9.99998H0V12H6V9.99998Z" fill="#8F8F8F" />
               <path d="M12 5.00002H0V7.00002H12V5.00002Z" fill="#8F8F8F" />
-              <path d="M18 0H0V2.00001H18V0Z" fill="#8F8F8F" /></svg
-            >Sort by
+              <path d="M18 0H0V2.00001H18V0Z" fill="#8F8F8F" />
+            </svg>
+            Sort by
           </button>
           <button class="filter__button filter__button-clear">Clear all</button>
         </div>
@@ -90,7 +90,7 @@
                   </svg>
                 </div>
               </button>
-              <p class="task__title"></p>
+              <div class="task__title"></div>
               <input type="text" class="task__input task__input-edit hidden" />
               <div class="task__buttons__wrapper">
                 <button class="task__button task__button-edit">
@@ -260,6 +260,7 @@
           </div>
         </div>
       </footer>
+      <div class="shadow hidden"></div>
     </div>
     <script src="./js/script.js"></script>
   </body>
