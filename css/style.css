@@ -278,9 +278,11 @@ html {
   padding: 0;
 }
 
-.task__button .task__checker {
+.task__button-checker {
   border: none;
   background: none;
+  padding: 0;
+  border-radius: 50%;
   box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.35);
 }
 
