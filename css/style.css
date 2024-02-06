@@ -40,7 +40,7 @@ html {
 
 .container {
   max-width: 768px;
-  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
   position: relative;
   display: flex;
